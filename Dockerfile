@@ -51,12 +51,14 @@ RUN mkdir -p \
         bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache database
 
-# Copy Nginx config and startup script.
+# Copy Nginx config and startup script into well-known locations.
 COPY nginx.conf /app/nginx.conf
-COPY start.sh /start.sh
+COPY start.sh   /start.sh
 RUN chmod +x /start.sh
 
+EXPOSE 8000
+
 # Railway injects APP_KEY, APP_ENV, DB_* etc. as environment variables at
-# runtime. The startup script initialises the database, then launches both
-# Nginx and PHP-FPM.
+# runtime. start.sh creates the DB, runs migrations, then starts PHP-FPM
+# (background) and Nginx (foreground).
 CMD ["/start.sh"]

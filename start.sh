@@ -8,11 +8,9 @@ touch /app/database/tracker.db
 php artisan migrate --force
 
 # ---------------------------------------------------------------------------
-# PHP-FPM: configure it to listen on a Unix socket so Nginx can reach it
-# without needing a TCP port.
+# PHP-FPM: write a pool config that listens on a Unix socket so Nginx can
+# reach it without a TCP port.
 # ---------------------------------------------------------------------------
-
-# Write a minimal pool override that switches the listen address to a socket.
 cat > /usr/local/etc/php-fpm.d/zz-railway.conf <<'EOF'
 [www]
 listen = /tmp/php-fpm.sock
@@ -20,20 +18,34 @@ listen.mode = 0666
 EOF
 
 # ---------------------------------------------------------------------------
-# Nginx: substitute $PORT (provided by Railway) into the config at runtime,
-# then validate and start Nginx in the background.
+# Start PHP-FPM in the background first, then wait for the socket to appear
+# before starting Nginx (avoids a race where Nginx starts before FPM is ready).
+# ---------------------------------------------------------------------------
+php-fpm --nodaemonize &
+FPM_PID=$!
+
+echo "Waiting for PHP-FPM socket..."
+for i in $(seq 1 30); do
+    [ -S /tmp/php-fpm.sock ] && break
+    sleep 1
+done
+
+if [ ! -S /tmp/php-fpm.sock ]; then
+    echo "ERROR: PHP-FPM socket did not appear after 30 seconds" >&2
+    exit 1
+fi
+echo "PHP-FPM socket ready."
+
+# ---------------------------------------------------------------------------
+# Nginx: substitute $PORT into the config at runtime, validate, then start.
+# envsubst only expands the variables listed — other nginx variables like
+# $uri are left untouched.
 # ---------------------------------------------------------------------------
 export PORT="${PORT:-8000}"
-
-# envsubst replaces ${PORT:-8000} — we only want to expand PORT, not every
-# shell variable that might appear in the config.
 envsubst '${PORT}' < /app/nginx.conf > /tmp/nginx.conf
 
-nginx -c /tmp/nginx.conf -t          # validate config
-nginx -c /tmp/nginx.conf &           # start in background
+nginx -c /tmp/nginx.conf -t   # validate — exits non-zero on bad config
+nginx -c /tmp/nginx.conf      # start in foreground (daemon off by default in Alpine)
 
-# ---------------------------------------------------------------------------
-# PHP-FPM: start in the foreground so the container stays alive and Docker /
-# Railway can observe its exit code.
-# ---------------------------------------------------------------------------
-exec php-fpm --nodaemonize
+# If Nginx exits, bring down PHP-FPM too so Railway restarts the container.
+kill "$FPM_PID"
