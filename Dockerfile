@@ -56,7 +56,7 @@ COPY nginx.conf /app/nginx.conf
 COPY start.sh   /start.sh
 RUN chmod +x /start.sh
 
-EXPOSE 8000
+EXPOSE 8080
 
 # Railway injects APP_KEY, APP_ENV, DB_* etc. as environment variables at
 # runtime. start.sh creates the DB, runs migrations, then starts PHP-FPM
