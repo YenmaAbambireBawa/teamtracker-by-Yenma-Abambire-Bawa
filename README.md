@@ -4,7 +4,10 @@ A Laravel 10 web application for tracking the daily activities of an application
 
 Built for **Npontu Technologies** platforms developer assessment.
 
-The link to the deployed site : teamtracker-by-yenma-abambire-bawa-production.up.railway.app
+## Live Demo
+
+🔗 [https://teamtracker-by-yenma-abambire-bawa-production.up.railway.app](https://teamtracker-by-yenma-abambire-bawa-production.up.railway.app)
+
 ## Default Login Accounts
 
 | Role   | Email                        | Password     |
