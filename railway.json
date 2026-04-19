@@ -4,7 +4,7 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "php artisan migrate --force && php artisan db:seed --force && php artisan config:cache && php artisan route:cache && php artisan view:cache && php artisan serve --host=0.0.0.0 --port=$PORT",
+    "startCommand": "mkdir -p /app/database /app/storage/framework/sessions /app/storage/framework/views /app/storage/framework/cache/data /app/storage/logs && touch /app/database/tracker.db && chmod -R 777 /app/storage /app/database /app/bootstrap/cache && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=$PORT",
     "healthcheckPath": "/",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
