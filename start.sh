@@ -1,10 +1,10 @@
 #!/bin/sh
 
-# replace env vars in nginx config
+# inject railway port into nginx config
 envsubst '$PORT' < /app/nginx.conf > /etc/nginx/nginx.conf
 
-# start php-fpm in background
+# start php-fpm
 php-fpm -D
 
-# start nginx in foreground
+# start nginx (this keeps container alive)
 nginx -g "daemon off;"
