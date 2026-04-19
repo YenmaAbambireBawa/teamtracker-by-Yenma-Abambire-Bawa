@@ -35,3 +35,7 @@ Route::middleware('auth.session')->group(function () {
         Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.destroy');
     });
 });
+
+Route::get('/', function () {
+    return 'alive and not ghosting railway';
+});
