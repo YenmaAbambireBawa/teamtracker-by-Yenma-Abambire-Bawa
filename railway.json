@@ -4,8 +4,9 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "mkdir -p /app/database /app/storage/framework/sessions /app/storage/framework/views /app/storage/framework/cache/data /app/storage/logs && touch /app/database/tracker.db && chmod -R 777 /app/storage /app/database /app/bootstrap/cache && php artisan migrate --force && php artisan db:seed --force && php artisan serve --host=0.0.0.0 --port=$PORT",
+    "startCommand": "mkdir -p /app/database /app/storage/framework/sessions /app/storage/framework/views /app/storage/framework/cache/data /app/storage/logs /app/bootstrap/cache && touch /app/database/tracker.db && chmod -R 777 /app/storage /app/database /app/bootstrap/cache && echo \"APP_NAME=\\\"Team Activity Tracker\\\"\" > /app/.env && echo \"APP_ENV=production\" >> /app/.env && echo \"APP_DEBUG=false\" >> /app/.env && echo \"APP_KEY=$APP_KEY\" >> /app/.env && echo \"APP_URL=$RAILWAY_PUBLIC_DOMAIN\" >> /app/.env && echo \"DB_CONNECTION=sqlite\" >> /app/.env && echo \"DB_DATABASE=/app/database/tracker.db\" >> /app/.env && echo \"SESSION_DRIVER=file\" >> /app/.env && echo \"SESSION_LIFETIME=480\" >> /app/.env && echo \"CACHE_STORE=file\" >> /app/.env && echo \"LOG_CHANNEL=stack\" >> /app/.env && echo \"LOG_LEVEL=error\" >> /app/.env && php artisan migrate --force && php artisan db:seed --force && php artisan config:clear && php artisan serve --host=0.0.0.0 --port=$PORT",
     "healthcheckPath": "/",
+    "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 3
   }
