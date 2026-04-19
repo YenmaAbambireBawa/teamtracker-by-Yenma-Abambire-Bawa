@@ -55,7 +55,9 @@ RUN mkdir -p \
 COPY nginx.conf /app/nginx.conf
 # Add this right before the COPY start.sh line
 ARG CACHE_BUST=1
+# bust: v4
 COPY start.sh /start.sh
+RUN sed -i 's/\r//' /start.sh && chmod +x /start.sh
 RUN chmod +x /start.sh
 
 EXPOSE 8080
@@ -64,3 +66,5 @@ EXPOSE 8080
 # runtime. start.sh creates the DB, runs migrations, then starts PHP-FPM
 # (background) and Nginx (foreground).
 CMD ["/start.sh"]
+
+
