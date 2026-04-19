@@ -1,10 +1,10 @@
-#!/bin/sh
-
-# inject railway port into nginx config
-envsubst '$PORT' < /app/nginx.conf > /etc/nginx/nginx.conf
-
-# start php-fpm
+echo '#!/bin/sh
+mkdir -p /app/database /app/storage/framework/sessions /app/storage/framework/views /app/storage/framework/cache/data /app/storage/logs /app/bootstrap/cache
+touch /app/database/tracker.db
+chmod -R 777 /app/storage /app/database /app/bootstrap/cache
+printf "APP_NAME=\"Team Activity Tracker\"\nAPP_ENV=production\nAPP_DEBUG=false\nAPP_KEY=%s\nDB_CONNECTION=sqlite\nDB_DATABASE=/app/database/tracker.db\nSESSION_DRIVER=file\nSESSION_LIFETIME=480\nCACHE_STORE=file\nLOG_LEVEL=error\n" "$APP_KEY" > /app/.env
+php artisan migrate --force
+php artisan db:seed --force
 php-fpm -D
-
-# start nginx (this keeps container alive)
-nginx -g "daemon off;"
+nginx -g "daemon off;"' > start.sh
+chmod +x start.sh
