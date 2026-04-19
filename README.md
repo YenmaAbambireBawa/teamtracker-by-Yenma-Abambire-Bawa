@@ -4,6 +4,17 @@ A Laravel 10 web application for tracking the daily activities of an application
 
 Built for **Npontu Technologies** platforms developer assessment.
 
+The link to the deployed site : teamtracker-by-yenma-abambire-bawa-production.up.railway.app
+## Default Login Accounts
+
+| Role   | Email                        | Password     |
+|--------|------------------------------|--------------|
+| Admin  | admin@company.com            | Admin@1234   |
+| Member | john.mensah@company.com      | Member@1234  |
+
+> The **Admin** account can manage activities and team members. He can perform CRUD functionalities
+> The **Member** account can update activity statuses and view reports.
+
 ## Features
 
 1. **Daily Activity Dashboard** — View all activities for any date, grouped by category
