@@ -11,7 +11,7 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interactio
 # ---------------------------------------------------------------------------
 # Stage 2 – Runtime image
 # ---------------------------------------------------------------------------
-FROM php:8.2-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install Nginx, envsubst (gettext), and required PHP extensions.
 RUN apk add --no-cache \
