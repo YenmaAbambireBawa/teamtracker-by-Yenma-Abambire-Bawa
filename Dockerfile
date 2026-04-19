@@ -1,11 +1,26 @@
-FROM php:8.2-cli
+# ---------------------------------------------------------------------------
+# Stage 1 – PHP dependencies
+# ---------------------------------------------------------------------------
+FROM composer:2 AS vendor
 
-# Install system dependencies and PHP extensions required by Laravel
-RUN apt-get update && apt-get install -y \
-    unzip \
-    libsqlite3-dev \
-    libxml2-dev \
-    libonig-dev \
+WORKDIR /app
+
+COPY composer.json composer.lock* ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
+
+# ---------------------------------------------------------------------------
+# Stage 2 – Runtime image
+# ---------------------------------------------------------------------------
+FROM php:8.2-fpm-alpine
+
+# Install Nginx, envsubst (gettext), and required PHP extensions.
+RUN apk add --no-cache \
+        nginx \
+        gettext \
+        sqlite \
+        sqlite-dev \
+        libxml2-dev \
+        oniguruma-dev \
     && docker-php-ext-install \
         pdo \
         pdo_sqlite \
@@ -13,27 +28,20 @@ RUN apt-get update && apt-get install -y \
         xml \
         ctype \
         fileinfo \
-        opcache \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Install Composer
-COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+        opcache
 
 WORKDIR /app
 
-# Copy dependency manifests first for better layer caching
-COPY composer.json composer.lock* ./
+# Copy vendor directory from the build stage.
+COPY --from=vendor /app/vendor ./vendor
 
-# Install PHP dependencies (no dev, optimised autoloader)
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
-
-# Copy the rest of the application
+# Copy the rest of the application source.
 COPY . .
 
-# Run post-install scripts now that the full app is present
-RUN composer run-script post-autoload-dump --no-interaction || true
+# Run post-autoload-dump scripts now that the full app is present.
+RUN php artisan package:discover --ansi || true
 
-# Create required runtime directories and set permissions
+# Create required runtime directories and set permissions.
 RUN mkdir -p \
         database \
         storage/framework/sessions \
@@ -43,10 +51,12 @@ RUN mkdir -p \
         bootstrap/cache \
     && chmod -R 775 storage bootstrap/cache database
 
+# Copy Nginx config and startup script.
+COPY nginx.conf /app/nginx.conf
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 # Railway injects APP_KEY, APP_ENV, DB_* etc. as environment variables at
-# runtime — no .env file is generated here.
-# The start command creates the SQLite database file, runs migrations, then
-# starts the built-in PHP server on the PORT provided by Railway.
-CMD touch /app/database/tracker.db \
-    && php artisan migrate --force \
-    && php artisan serve --host=0.0.0.0 --port=${PORT:-8000}
+# runtime. The startup script initialises the database, then launches both
+# Nginx and PHP-FPM.
+CMD ["/start.sh"]
