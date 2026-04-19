@@ -20,48 +20,6 @@ Built for **Npontu Technologies** platforms developer assessment.
 - **Frontend:** Blade templates + Bootstrap 5
 - **Auth:** Custom session-based authentication with bcrypt password hashing
 
-## Local Development
-
-```bash
-# 1. Install PHP dependencies
-composer install
-
-# 2. Set up environment
-cp .env.example .env
-php artisan key:generate
-
-# 3. Run migrations and seed default data
-php artisan migrate
-php artisan db:seed
-
-# 4. Start the server
-php artisan serve
-
-# Open http://localhost:8000
-```
-
-**Default login:**
-- Admin: `admin@company.com` / `Admin@1234`
-- Member: `john.mensah@company.com` / `Member@1234`
-
-## Deploy to Railway
-
-1. Push this folder to a new GitHub repository.
-2. Go to [railway.app](https://railway.app) → **New Project → Deploy from GitHub repo**.
-3. Select the repo. Railway auto-detects PHP via `composer.json`.
-4. Add these environment variables in Railway's **Variables** tab:
-
-| Variable | Value |
-|---|---|
-| `APP_ENV` | `production` |
-| `APP_DEBUG` | `false` |
-| `APP_KEY` | Run `php artisan key:generate --show` locally and paste here |
-| `SESSION_SECURE_COOKIE` | `true` |
-
-5. Add a **Railway Volume** mounted at `/app/storage` to persist sessions and database.
-6. Then set `DB_DATABASE` to `/app/storage/database/tracker.db`.
-7. Railway will run migrations and seed automatically on each deploy.
-
 ## Project Structure
 
 ```
