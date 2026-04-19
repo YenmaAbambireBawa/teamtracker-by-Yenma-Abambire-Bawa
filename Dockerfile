@@ -53,7 +53,9 @@ RUN mkdir -p \
 
 # Copy Nginx config and startup script into well-known locations.
 COPY nginx.conf /app/nginx.conf
-COPY start.sh   /start.sh
+# Add this right before the COPY start.sh line
+ARG CACHE_BUST=1
+COPY start.sh /start.sh
 RUN chmod +x /start.sh
 
 EXPOSE 8080
